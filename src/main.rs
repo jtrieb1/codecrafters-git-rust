@@ -20,13 +20,13 @@ enum Commands {
     Init,
     #[command(name = "cat-file")]
     CatFile {
-        #[arg(short, long)]
+        #[arg(short, long, conflicts_with_all = &["ty", "size", "exists"])]
         pretty_print: bool,
-        #[arg(short, long)]
+        #[arg(short, long, conflicts_with_all = &["pretty_print", "size", "exists"])]
         ty: bool,
-        #[arg(short, long)]
+        #[arg(short, long, conflicts_with_all = &["pretty_print", "ty", "exists"])]
         size: bool,
-        #[arg(short, long)]
+        #[arg(short, long, conflicts_with_all = &["pretty_print", "ty", "size"])]
         exists: bool,
         hash: String,
     },
@@ -45,6 +45,11 @@ enum Commands {
             conflicts_with = "stdin_paths"
         )]
         file: Vec<PathBuf>,
+    },
+    LsTree {
+        #[arg(long)]
+        name_only: bool,
+        sha: String,
     }
 }
 
@@ -72,6 +77,9 @@ fn main() {
         },
         Commands::HashObject { write, ty, stdin, stdin_paths, file } => {
             commands::hash_object::hash_object(write, ty, stdin, stdin_paths, &file);
+        },
+        Commands::LsTree { name_only, sha } => {
+            commands::ls_tree::ls_tree(name_only, &sha);
         }
     }
 }
