@@ -1,13 +1,17 @@
-#[allow(unused_imports)]
-use std::env;
-#[allow(unused_imports)]
-use std::fs;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
 mod commands;
 mod shared;
+
+use commands::{ 
+    init::init, 
+    cat_file::{command::cat_file, input::CatFileInput}, 
+    hash_object::{command::hash_object, input::HashObjectInput}, 
+    ls_tree::{command::ls_tree, input::LsTreeInput}, 
+    write_tree::{command::write_tree, input::WriteTreeInput}
+};
 
 #[derive(Parser)]
 struct Cli {
@@ -50,36 +54,61 @@ enum Commands {
         #[arg(long)]
         name_only: bool,
         sha: String,
+    },
+    WriteTree {
+        #[arg(long)]
+        missing_ok: bool,
+        #[arg(long)]
+        prefix: Option<String>,
     }
 }
 
-fn main() {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    eprintln!("Logs from your program will appear here!");
-
+fn main() -> Result<(), anyhow::Error> {
     let args = Cli::parse();
     match args.command {
         Commands::Init => {
-            commands::init::init();
+            init().map_err(|e| anyhow::anyhow!(e))
         }
         Commands::CatFile { pretty_print, ty, size, exists, hash } => {
-            if pretty_print {
-                commands::cat_file::cat_file("p", &hash);
-            } else if ty {
-                commands::cat_file::cat_file("t", &hash);
-            } else if size {
-                commands::cat_file::cat_file("s", &hash);
-            } else if exists {
-                commands::cat_file::cat_file("e", &hash);
-            } else {
-                println!("No flag provided for cat-file command");
+            let input = CatFileInput {
+                pretty_print,
+                ty,
+                size,
+                exists,
+                hash,
+            };
+
+            if let Err(e) = input.validate() {
+                return Err(anyhow::anyhow!(e));
             }
+
+            cat_file(input).map_err(|e| anyhow::anyhow!(e))
         },
         Commands::HashObject { write, ty, stdin, stdin_paths, file } => {
-            commands::hash_object::hash_object(write, ty, stdin, stdin_paths, &file);
+            let input = HashObjectInput {
+                write,
+                ty,
+                stdin,
+                stdin_paths,
+                file,
+            };
+            if let Err(e) = input.validate() {
+                return Err(anyhow::anyhow!(e));
+            }
+            hash_object(input).map_err(|e| anyhow::anyhow!(e))
         },
         Commands::LsTree { name_only, sha } => {
-            commands::ls_tree::ls_tree(name_only, &sha);
+            ls_tree(LsTreeInput {
+                name_only,
+                sha,
+            }).map_err(|e| anyhow::anyhow!(e))
+        },
+        Commands::WriteTree { missing_ok, prefix } => {
+            let input = WriteTreeInput {
+                missing_ok,
+                prefix,
+            };
+            write_tree(input).map_err(|e| anyhow::anyhow!(e))
         }
     }
 }

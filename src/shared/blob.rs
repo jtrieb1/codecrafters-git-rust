@@ -10,8 +10,8 @@ impl Blob {
         Blob { content }
     }
 
-    pub fn content(&self) -> &[u8] {
-        &self.content
+    pub fn print_content(&self) {
+        print!("{}", String::from_utf8_lossy(&self.content));
     }
 }
 
