@@ -1,7 +1,36 @@
 use std::io::Read;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ObjectType {
+    Blob,
+    Tree,
+    Commit,
+    Tag,
+}
+
+impl ObjectType {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "blob" => Some(ObjectType::Blob),
+            "tree" => Some(ObjectType::Tree),
+            "commit" => Some(ObjectType::Commit),
+            "tag" => Some(ObjectType::Tag),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            ObjectType::Blob => "blob",
+            ObjectType::Tree => "tree",
+            ObjectType::Commit => "commit",
+            ObjectType::Tag => "tag",
+        }
+    }
+}
+
 pub struct Object {
-    object_type: String,
+    object_type: ObjectType,
     size: usize,
     content: Vec<u8>,
 }
@@ -14,7 +43,7 @@ impl Object {
         format!(".git/objects/{}/{}", dir, file)
     }
 
-    pub fn object_type(&self) -> &str {
+    pub fn object_type(&self) -> &ObjectType {
         &self.object_type
     }
 
@@ -42,7 +71,7 @@ impl Object {
         let size = header_parts.next().ok_or("Invalid object format: missing size")?.parse::<usize>().map_err(|e| format!("Invalid size in object header: {}", e))?;
 
         Ok(Object {
-            object_type,
+            object_type: ObjectType::from_str(&object_type).ok_or("Invalid object type")?,
             size,
             content: content.to_vec(),
         })

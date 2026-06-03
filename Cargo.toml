@@ -12,3 +12,4 @@ clap = { version = "4.6.1", features = ["derive"] }
 flate2 = { version = "1.0.34", features = ["zlib-rs"] }                                # compression
 thiserror = "1.0.38"                             # error handling
 clap_derive = { version = "4.0.0-rc.1" }
+sha1 = "0.11.0"

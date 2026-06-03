@@ -6,7 +6,7 @@ pub fn cat_file(flag: &str, hash: &str) {
         print!("{}", String::from_utf8_lossy(&object.content()));
     } else if flag == "t" {
         let object = Object::from_hash(hash).unwrap();
-        print!("{}", object.object_type());
+        print!("{}", object.object_type().as_str());
     } else if flag == "s" {
         let object = Object::from_hash(hash).unwrap();
         print!("{}", object.size());

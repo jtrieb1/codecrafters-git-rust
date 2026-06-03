@@ -2,6 +2,7 @@
 use std::env;
 #[allow(unused_imports)]
 use std::fs;
+use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
@@ -29,6 +30,22 @@ enum Commands {
         exists: bool,
         hash: String,
     },
+    HashObject {
+        #[arg(short, long)]
+        write: bool,
+        #[arg(short = 't', default_value = "blob")]
+        ty: String,
+        #[arg(long, conflicts_with = "stdin_paths")]
+        stdin: bool,
+        #[arg(long, conflicts_with_all = &["stdin", "file", "path"])]
+        stdin_paths: bool,
+        #[arg(
+            value_name = "file",
+            required_unless_present_any = &["stdin", "stdin_paths"],
+            conflicts_with = "stdin_paths"
+        )]
+        file: Vec<PathBuf>,
+    }
 }
 
 fn main() {
@@ -52,6 +69,9 @@ fn main() {
             } else {
                 println!("No flag provided for cat-file command");
             }
+        },
+        Commands::HashObject { write, ty, stdin, stdin_paths, file } => {
+            commands::hash_object::hash_object(write, ty, stdin, stdin_paths, &file);
         }
     }
 }
