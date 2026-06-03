@@ -102,10 +102,12 @@ impl Object {
     }
 
     pub fn persist(&self) -> Result<Vec<u8>, String> {
-        let compressed = self.as_compressed();
+        let raw = self.as_raw();
         let mut sha = sha1::Sha1::new();
-        sha.update(&compressed);
+        sha.update(&raw);
         let hash = &sha.finalize()[..];
+
+        let compressed = self.as_compressed();
 
         let object_path = Object::hash_to_object_path(&hash);
         std::fs::create_dir_all(std::path::Path::new(&object_path).parent().unwrap()).map_err(|e| format!("Failed to create object directory: {}", e))?;

@@ -97,14 +97,14 @@ impl Tree {
         }).collect()
     }
 
-    pub fn to_raw_content(&self) -> Vec<u8> {
+    pub fn as_raw_content(&self) -> Vec<u8> {
         let content = self.raw_content();
         let header = format!("{} {}\0", ObjectType::Tree.as_str(), content.len());
         [header.as_bytes(), &content].concat()
     }
 
     pub fn persist(&self) -> Result<Vec<u8>, String> {
-        let content = self.to_raw_content();
+        let content = self.as_raw_content();
         let mut sha = sha1::Sha1::new();
         sha.update(&content);
         let hash = &sha.finalize().to_vec();
