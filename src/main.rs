@@ -8,6 +8,7 @@ mod shared;
 use commands::{ 
     init::init, 
     cat_file::{command::cat_file, input::CatFileInput}, 
+    commit_tree::{command::commit_tree, input::CommitTreeInput},
     hash_object::{command::hash_object, input::HashObjectInput}, 
     ls_tree::{command::ls_tree, input::LsTreeInput}, 
     write_tree::{command::write_tree, input::WriteTreeInput}
@@ -60,6 +61,13 @@ enum Commands {
         missing_ok: bool,
         #[arg(long)]
         prefix: Option<String>,
+    },
+    CommitTree {
+        #[arg(short, long)]
+        message: String,
+        #[arg(short, long)]
+        parent: Option<String>,
+        tree: String
     }
 }
 
@@ -109,6 +117,18 @@ fn main() -> Result<(), anyhow::Error> {
                 prefix,
             };
             write_tree(input).map_err(|e| anyhow::anyhow!(e))
+        },
+        Commands::CommitTree { message, parent, tree } => {
+            let input = CommitTreeInput {
+                message,
+                parent,
+                tree,
+            };
+            if let Err(e) = input.validate() {
+                return Err(anyhow::anyhow!(e));
+            };
+
+            commit_tree(input).map_err(|e| anyhow::anyhow!(e))
         }
     }
 }

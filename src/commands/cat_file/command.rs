@@ -1,3 +1,4 @@
+use crate::shared::commit::Commit;
 use crate::shared::{ object::Object, blob::Blob, tree::Tree, hash::hash_from_string };
 use super::input::CatFileInput;
 use super::errors::CatFileError;
@@ -12,6 +13,8 @@ fn pretty_print(object: &Object) {
         blob.print_content();
     } else if let Ok(tree) = Tree::try_from(object) {
         tree.pretty_print();
+    } else if let Ok(commit) = Commit::try_from(object) {
+        commit.pretty_print();
     } else {
         print!("Unsupported object type: {}", object.object_type().as_str());
     }
