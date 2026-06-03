@@ -10,7 +10,7 @@ use sha1::{Sha1, Digest};
 pub fn hash_object_from_file(write: bool, ty: &str, file_path: &str) {
     let content = fs::read(file_path).unwrap();
 
-    let header = format!("{} {}", ty, content.len());
+    let header = format!("{} {}\0", ty, content.len());
 
     let store_content = [header.as_bytes(), &content].concat();
 
@@ -33,7 +33,7 @@ pub fn hash_object_from_stdin(write: bool, ty: &str) {
     let mut buffer = Vec::new();
     std::io::stdin().read_to_end(&mut buffer).unwrap();
 
-    let header = format!("{} {}", ty, buffer.len());
+    let header = format!("{} {}\0", ty, buffer.len());
 
     let store_content = [header.as_bytes(), &buffer].concat();
 
