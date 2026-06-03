@@ -175,7 +175,7 @@ impl From<&Commit> for Object {
         }
         content.extend_from_slice(format!("author {} <{}> {} {}\n", value.author.name, value.author.email, value.author.timestamp, value.author.timezone).as_bytes());
         content.extend_from_slice(format!("committer {} <{}> {} {}\n\n", value.committer.name, value.committer.email, value.committer.timestamp, value.committer.timezone).as_bytes());
-        content.extend_from_slice(value.message.as_bytes());
+        content.extend_from_slice(format!("{}\n", value.message).as_bytes()); // Every line of the commit object content, including the message, should end with a newline character
 
         Object::new(ObjectType::Commit, content)
     }
