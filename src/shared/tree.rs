@@ -223,6 +223,7 @@ impl Tree {
                 hash_to_string(&entry.hash)
             ));
         }
+        output.pop();
         output
     }
 
@@ -231,6 +232,8 @@ impl Tree {
         for entry in &self.entries {
             output.push_str(&format!("{}\n", entry.name));
         }
+        // Remove trailing newline
+        output.pop();
         output
     }
 }
