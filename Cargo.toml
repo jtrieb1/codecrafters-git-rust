@@ -13,3 +13,13 @@ flate2 = { version = "1.0.34", features = ["zlib-rs"] }                         
 thiserror = "1.0.38"                             # error handling
 clap_derive = { version = "4.0.0-rc.1" }
 sha1 = "0.11.0"
+reqwest = { version = "0.13.4", features = ["blocking", "cookies", "stream"] }
+cookie_store = "0.22.1"
+chrono = "0.4.45"
+nom = "8.0.0"
+tempfile = "3.27.0"
+serial_test = "3.5.0"
+sha2 = "0.11.0"
+tokio = { version = "1.52.3", features = ["full"] }
+tokio-macros = "2.7.0"
+futures-util = "0.3.32"

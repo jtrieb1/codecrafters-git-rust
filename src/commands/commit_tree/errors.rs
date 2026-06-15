@@ -1,10 +1,10 @@
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum CommitTreeError {
     InvalidTreeHash(String),
     InvalidParentHash(String),
     InvalidMessage(String),
     ObjectNotFound(String),
+    HeadUpdateError(String),
 }
 
 impl std::fmt::Display for CommitTreeError {
@@ -14,6 +14,7 @@ impl std::fmt::Display for CommitTreeError {
             CommitTreeError::InvalidParentHash(e) => write!(f, "Invalid parent hash: {}", e),
             CommitTreeError::InvalidMessage(e) => write!(f, "Invalid commit message: {}", e),
             CommitTreeError::ObjectNotFound(e) => write!(f, "Object not found: {}", e),
+            CommitTreeError::HeadUpdateError(e) => write!(f, "Failed to update HEAD: {}", e),
         }
     }
 }

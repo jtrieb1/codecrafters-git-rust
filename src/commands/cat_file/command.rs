@@ -1,51 +1,77 @@
-use crate::shared::commit::Commit;
-use crate::shared::{ object::Object, blob::Blob, tree::Tree, hash::hash_from_string };
-use super::input::CatFileInput;
 use super::errors::CatFileError;
+use super::input::CatFileInput;
+use crate::shared::hash::hash_to_string;
+use crate::shared::refs::GitRef;
+use crate::shared::{hash::hash_from_string, object::Object};
 
-fn check_exists(hash: &[u8]) -> bool {
-    let object_path = Object::hash_to_object_path(hash);
-    std::fs::metadata(object_path).is_ok()
-}
-
-fn pretty_print(object: &Object) {
-    if let Ok(blob) = Blob::try_from(object) {
-        blob.print_content();
-    } else if let Ok(tree) = Tree::try_from(object) {
-        tree.pretty_print();
-    } else if let Ok(commit) = Commit::try_from(object) {
-        commit.pretty_print();
-    } else {
-        print!("Unsupported object type: {}", object.object_type().as_str());
+fn get_input_object(input_obj: &str) -> Result<Object, CatFileError> {
+    // Need to check for 3 possible kinds:
+    // SHA-1 hash, ref name, or tree-ish (commit/tag/tree)
+    // Check if it's a valid SHA-1 hash first
+    // Just check if it's 40 hex characters, since that's the only valid format for a hash input
+    if input_obj.len() == 40 && input_obj.chars().all(|c| c.is_digit(16)) {
+        let hash = hash_from_string(input_obj);
+        let object = Object::try_from_hash(&hash).map_err(|_| {
+            CatFileError::FileNotFound(
+                hash_to_string(&hash)
+            )
+        })?;
+        return Ok(object);
     }
+
+    // If not a hash, check if it's a ref name
+    let ref_path = format!(".git/refs/heads/{}", input_obj);
+    if std::fs::metadata(&ref_path).is_ok() {
+        let Ok(ref_head) = GitRef::from_file_path(&ref_path) else {
+            return Err(CatFileError::FileNotFound(
+                input_obj.to_string()
+            ));
+        };
+        let object = ref_head.resolve().map_err(|e| {
+            CatFileError::FileNotFound(format!("Failed to resolve ref {}: {}", input_obj, e))
+        })?;
+        return Ok(object);
+    }
+
+    // Check if it's a tag name
+    let tag_ref_path = format!(".git/refs/tags/{}", input_obj);
+    if std::fs::metadata(&tag_ref_path).is_ok() {
+        let Ok(ref_tag) = GitRef::from_file_path(&tag_ref_path) else {
+            return Err(CatFileError::FileNotFound(format!(
+                "Failed to read tag ref {}: unknown error",
+                input_obj
+            )));
+        };
+        let object = ref_tag.resolve().map_err(|e| {
+            CatFileError::FileNotFound(format!("Failed to resolve tag ref {}: {}", input_obj, e))
+        })?;
+        return Ok(object);
+    }
+    Err(CatFileError::FileNotFound(format!(
+        "Invalid input: {}",
+        input_obj
+    )))
 }
 
-pub fn cat_file(input: CatFileInput) -> Result<(), CatFileError> {
+pub fn cat_file(input: CatFileInput) -> Result<String, CatFileError> {
     let flag = input.as_flag().ok_or(CatFileError::NoFlagProvided)?;
-    let hash = hash_from_string(&input.hash);
+    let object = get_input_object(&input.object);
 
     if flag == "e" {
-        // Handle this up-front since we don't need to read the object data
-        if check_exists(&hash) {
-            print!("exists");
-        } else {
-            print!("does not exist");
+        if let Err(_) = object {
+            return Err(CatFileError::FileNotFound(input.object))
         }
-        return Ok(());
+        return Ok("".to_string());
     }
 
-    let object = Object::try_from_hash(&hash).map_err(|_| CatFileError::UnknownFlag(format!("Object not found: {}", input.hash)))?;
-
+    let object = object?;
     if flag == "p" {
-        pretty_print(&object);
+        return Ok(object.pretty_print());
     } else if flag == "t" {
-        print!("{}", object.object_type().as_str());
+        return Ok(object.object_type().as_str().to_string());
     } else if flag == "s" {
-        print!("{}", object.size());
+        return Ok(object.size().to_string());
     } else {
-        print!("unknown flag: {}", flag);
         return Err(CatFileError::UnknownFlag(flag.to_string()));
     }
-
-    Ok(())
 }

@@ -1,6 +1,11 @@
 pub mod cat_file;
+pub mod checkout;
+pub mod clone;
 pub mod commit_tree;
-pub mod init;
 pub mod hash_object;
+pub mod init;
+pub mod ls_remote;
 pub mod ls_tree;
+pub mod tag;
+pub mod unpack_objects;
 pub mod write_tree;
