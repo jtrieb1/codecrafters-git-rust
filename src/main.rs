@@ -137,7 +137,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 return Err(anyhow::anyhow!(e));
             }
 
-            println!("{}", cat_file(input).map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", cat_file(input).map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
         Commands::HashObject {
@@ -157,11 +157,11 @@ async fn main() -> Result<(), anyhow::Error> {
             if let Err(e) = input.validate() {
                 return Err(anyhow::anyhow!(e));
             }
-            println!("{}", hash_object(input).map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", hash_object(input).map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
         Commands::LsTree { name_only, sha } => {
-            println!(
+            print!(
                 "{}",
                 ls_tree(LsTreeInput { name_only, sha }).map_err(|e| anyhow::anyhow!(e))?
             );
@@ -169,7 +169,7 @@ async fn main() -> Result<(), anyhow::Error> {
         }
         Commands::WriteTree { missing_ok, prefix } => {
             let input = WriteTreeInput { missing_ok, prefix };
-            println!("{}", write_tree(input).map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", write_tree(input).map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
         Commands::CommitTree {
@@ -186,7 +186,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 return Err(anyhow::anyhow!(e));
             };
 
-            println!("{}", commit_tree(input).map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", commit_tree(input).map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
         Commands::Checkout { commit_hash } => {
@@ -197,7 +197,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 return Err(anyhow::anyhow!(e));
             };
 
-            println!("{}", checkout(input).map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", checkout(input).map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
         Commands::UnpackObjects {
@@ -214,7 +214,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 max_input_size,
                 packfile_path,
             };
-            println!("{}", unpack_objects(input).map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", unpack_objects(input).map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
         Commands::Tag {
@@ -242,14 +242,14 @@ async fn main() -> Result<(), anyhow::Error> {
                 return Err(anyhow::anyhow!(e));
             };
 
-            println!("{}", tag(input).map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", tag(input).map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
         Commands::LsRemote { repository } => {
             let input = LsRemoteInput {
                 repository: Some(repository),
             };
-            println!("{}", ls_remote(input).await.map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", ls_remote(input).await.map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         },
         Commands::Clone { local, repository_location, destination_path } => {
@@ -258,7 +258,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 repository_location,
                 destination_path,
             };
-            println!("{}", commands::clone::command::clone(input).await.map_err(|e| anyhow::anyhow!(e))?);
+            print!("{}", commands::clone::command::clone(input).await.map_err(|e| anyhow::anyhow!(e))?);
             Ok(())
         }
     }
